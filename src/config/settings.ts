@@ -41,7 +41,7 @@ export const config = {
 
   // Features
   features: {
-    whatsappCheckout: true,
+    whatsappCheckout: false,
     smsCheckout: true,
     emailCheckout: true,
     copyOrder: true,

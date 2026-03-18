@@ -5,6 +5,7 @@ export default function Footer() {
     <footer className="bg-gray-900 text-white py-12 mt-16">
       <div className="container mx-auto px-4">
         <div className="grid md:grid-cols-4 gap-8">
+
           {/* About */}
           <div>
             <div className="flex items-center gap-3 mb-4">
@@ -21,12 +22,12 @@ export default function Footer() {
             </p>
 
             <a
-              href="https://wa.me/14092768534"
+              href="https://www.instagram.com/aptbites/"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-block bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition text-sm font-semibold"
+              className="inline-block bg-pink-600 text-white px-4 py-2 rounded-lg hover:bg-pink-700 transition text-sm font-semibold"
             >
-              Order on WhatsApp
+              Order via Instagram
             </a>
           </div>
 
@@ -34,36 +35,12 @@ export default function Footer() {
           <div>
             <h4 className="text-lg font-semibold mb-4">Quick Links</h4>
             <ul className="space-y-2">
-              <li>
-                <Link href="/" className="text-gray-400 hover:text-white transition">
-                  Home
-                </Link>
-              </li>
-              <li>
-                <Link href="/products" className="text-gray-400 hover:text-white transition">
-                  Products
-                </Link>
-              </li>
-              <li>
-                <Link href="/categories/snacks" className="text-gray-400 hover:text-white transition">
-                  Snacks
-                </Link>
-              </li>
-              <li>
-                <Link href="/categories/beverages" className="text-gray-400 hover:text-white transition">
-                  Beverages
-                </Link>
-              </li>
-              <li>
-                <Link href="/categories/household" className="text-gray-400 hover:text-white transition">
-                  Household
-                </Link>
-              </li>
-              <li>
-                <Link href="/about" className="text-gray-400 hover:text-white transition">
-                  About Us
-                </Link>
-              </li>
+              <li><Link href="/" className="text-gray-400 hover:text-white">Home</Link></li>
+              <li><Link href="/products" className="text-gray-400 hover:text-white">Products</Link></li>
+              <li><Link href="/categories/snacks" className="text-gray-400 hover:text-white">Snacks</Link></li>
+              <li><Link href="/categories/beverages" className="text-gray-400 hover:text-white">Beverages</Link></li>
+              <li><Link href="/categories/household" className="text-gray-400 hover:text-white">Household</Link></li>
+              <li><Link href="/about" className="text-gray-400 hover:text-white">About Us</Link></li>
             </ul>
           </div>
 
@@ -85,17 +62,7 @@ export default function Footer() {
             <ul className="space-y-2 text-gray-400">
               <li>📧 getaptbites@gmail.com</li>
               <li>📱 409-276-8534</li>
-              <li>
-                💬{' '}
-                <a
-                  href="https://wa.me/14092768534"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-green-400 hover:text-green-300 transition"
-                >
-                  WhatsApp
-                </a>
-              </li>
+
               <li>
                 📸{' '}
                 <a
@@ -107,8 +74,19 @@ export default function Footer() {
                   Instagram
                 </a>
               </li>
+
+              <li>
+                📩{' '}
+                <a
+                  href="mailto:getaptbites@gmail.com"
+                  className="text-blue-400 hover:text-blue-300 transition"
+                >
+                  Email
+                </a>
+              </li>
             </ul>
           </div>
+
         </div>
 
         <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">

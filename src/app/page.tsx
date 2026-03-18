@@ -23,7 +23,7 @@ export default function Home() {
 
             <p className="text-base md:text-lg mb-8 text-white/85">
               Order everyday items for your home without leaving your building.
-              Fast delivery, flexible payment, and easy ordering through cart, text, or WhatsApp.
+              Fast delivery, flexible payment, and easy ordering through cart, text, Instagram, or email.
             </p>
 
             <div className="flex gap-3 mb-8 flex-wrap">
@@ -47,12 +47,12 @@ export default function Home() {
               </Link>
 
               <a
-                href="https://wa.me/14092768534"
+                href="https://www.instagram.com/aptbites/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="border border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-primary transition inline-block text-center"
               >
-                Chat on WhatsApp
+                Order via Instagram
               </a>
             </div>
           </div>
@@ -70,7 +70,7 @@ export default function Home() {
               ⏰ Morning: 8:00 AM - 10:00 AM | Evening: 6:00 PM - 8:00 PM
             </div>
             <div className="text-gray-700 font-medium">
-              📱 Order through cart, text, WhatsApp, or email
+              📱 Order through cart, text, Instagram, or email
             </div>
           </div>
         </div>
@@ -157,26 +157,24 @@ export default function Home() {
           <div className="max-w-4xl mx-auto bg-primary text-white rounded-2xl shadow-lg p-8 md:p-10 text-center">
             <h2 className="text-3xl font-bold mb-4">Follow AptBites and place your next order</h2>
             <p className="text-lg text-white/90 mb-8">
-              Stay updated on new products, offers, and apartment delivery updates through Instagram and WhatsApp.
+              Stay updated on new products, offers, and apartment delivery updates through Instagram and email.
             </p>
 
             <div className="flex flex-col sm:flex-row justify-center gap-4">
               <a
-                href="https://wa.me/14092768534"
+                href="https://www.instagram.com/aptbites/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="bg-white text-primary px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition"
               >
-                Chat on WhatsApp
+                Order via Instagram
               </a>
 
               <a
-                href="https://www.instagram.com/aptbites/"
-                target="_blank"
-                rel="noopener noreferrer"
+                href="mailto:getaptbites@gmail.com"
                 className="border border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-primary transition"
               >
-                Follow on Instagram
+                Email AptBites
               </a>
             </div>
           </div>

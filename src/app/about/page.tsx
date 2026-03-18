@@ -26,8 +26,8 @@ export default function AboutPage() {
           </p>
           <p className="text-lg text-gray-700 mb-4">
             We are starting within our own apartment community and focusing on fast,
-            reliable service. Order through WhatsApp, choose your delivery time, and
-            get what you need without leaving your building.
+            reliable service. Order through Instagram, text, or email, choose your
+            delivery time, and get what you need without leaving your building.
           </p>
           <p className="text-lg text-gray-700">
             Available items include drinks, snacks, instant food, and basic household essentials.
@@ -45,10 +45,10 @@ export default function AboutPage() {
           </div>
 
           <div className="bg-gradient-to-br from-secondary to-primary text-white rounded-xl shadow-lg p-6">
-            <div className="text-4xl mb-3">💬</div>
+            <div className="text-4xl mb-3">📱</div>
             <h3 className="text-2xl font-bold mb-2">Easy Ordering</h3>
             <p>
-              Place your order in a few steps using WhatsApp.
+              Place your order in a few steps using Instagram DM, text, or email.
               Select items, share your apartment number, and we will confirm and deliver.
             </p>
           </div>
@@ -110,27 +110,25 @@ export default function AboutPage() {
         <div className="bg-primary text-white rounded-xl shadow-lg p-8 text-center">
           <h3 className="text-3xl font-bold mb-4">Need something or have a request?</h3>
           <p className="text-lg mb-6">
-            Message us on WhatsApp for orders, product requests, or any questions.
-            Follow AptBites on Instagram for updates, products, and offers.
+            Reach out on Instagram for orders, product requests, or updates.
+            You can also email us anytime with questions or special requests.
           </p>
 
           <div className="flex flex-col sm:flex-row justify-center gap-4">
             <a
-              href="https://wa.me/14092768534"
+              href="https://www.instagram.com/aptbites/"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-block bg-white text-primary px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition"
             >
-              Chat on WhatsApp
+              Order via Instagram
             </a>
 
             <a
-              href="https://www.instagram.com/aptbites/"
-              target="_blank"
-              rel="noopener noreferrer"
+              href="mailto:getaptbites@gmail.com"
               className="inline-block border border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-primary transition"
             >
-              Follow on Instagram
+              Email AptBites
             </a>
           </div>
 
