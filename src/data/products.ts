@@ -1,0 +1,223 @@
+import { Product } from '@/types'
+
+const PRODUCTS_STORAGE_KEY = 'aptbites-products'
+
+// Default products
+export const defaultProducts: Product[] = [
+  // Snacks
+  {
+    id: 1,
+    name: 'Lays Classic Chips',
+    price: 2.49,
+    category: 'Snacks',
+    image: '🍟',
+    rating: 4.5,
+    description: 'Classic salted potato chips.',
+    stock: 50,
+  },
+  {
+    id: 2,
+    name: 'Snickers Bar',
+    price: 1.99,
+    category: 'Snacks',
+    image: '🍫',
+    rating: 4.7,
+    description: 'Chocolate bar with peanuts and caramel.',
+    stock: 80,
+  },
+  {
+    id: 3,
+    name: 'Oreo Cookies',
+    price: 3.99,
+    category: 'Snacks',
+    image: '🍪',
+    rating: 4.8,
+    description: 'Classic chocolate sandwich cookies.',
+    stock: 60,
+  },
+  {
+    id: 4,
+    name: 'Microwave Popcorn',
+    price: 2.99,
+    category: 'Snacks',
+    image: '🍿',
+    rating: 4.4,
+    description: 'Quick buttery popcorn for movie nights.',
+    stock: 45,
+  },
+  {
+    id: 5,
+    name: 'Cup Noodles',
+    price: 1.79,
+    category: 'Snacks',
+    image: '🍜',
+    rating: 4.6,
+    description: 'Easy instant noodles for a quick meal.',
+    stock: 70,
+  },
+  {
+    id: 6,
+    name: 'Trail Mix',
+    price: 4.49,
+    category: 'Snacks',
+    image: '🥜',
+    rating: 4.3,
+    description: 'A tasty mix of nuts and dried fruit.',
+    stock: 40,
+  },
+
+  // Beverages
+  {
+    id: 7,
+    name: 'Coca-Cola Can',
+    price: 1.99,
+    category: 'Beverages',
+    image: '🥤',
+    rating: 4.6,
+    description: 'Classic cold Coca-Cola.',
+    stock: 100,
+  },
+  {
+    id: 8,
+    name: 'Pepsi Can',
+    price: 1.99,
+    category: 'Beverages',
+    image: '🥤',
+    rating: 4.4,
+    description: 'Refreshing Pepsi soft drink.',
+    stock: 90,
+  },
+  {
+    id: 9,
+    name: 'Gatorade',
+    price: 2.49,
+    category: 'Beverages',
+    image: '🧃',
+    rating: 4.5,
+    description: 'Sports drink for hydration.',
+    stock: 75,
+  },
+  {
+    id: 10,
+    name: 'Bottled Water',
+    price: 1.25,
+    category: 'Beverages',
+    image: '💧',
+    rating: 4.9,
+    description: 'Clean bottled drinking water.',
+    stock: 200,
+  },
+  {
+    id: 11,
+    name: 'Orange Juice',
+    price: 3.99,
+    category: 'Beverages',
+    image: '🍊',
+    rating: 4.5,
+    description: 'Refreshing orange juice.',
+    stock: 50,
+  },
+  {
+    id: 12,
+    name: 'Iced Tea',
+    price: 2.49,
+    category: 'Beverages',
+    image: '🍵',
+    rating: 4.3,
+    description: 'Cool and refreshing iced tea.',
+    stock: 65,
+  },
+
+  // Household
+  {
+    id: 13,
+    name: 'Paper Towels',
+    price: 5.99,
+    category: 'Household',
+    image: '🧻',
+    rating: 4.6,
+    description: 'Absorbent paper towels for daily use.',
+    stock: 40,
+  },
+  {
+    id: 14,
+    name: 'Dish Soap',
+    price: 3.49,
+    category: 'Household',
+    image: '🧴',
+    rating: 4.7,
+    description: 'Dishwashing liquid for everyday cleaning.',
+    stock: 35,
+  },
+  {
+    id: 15,
+    name: 'Laundry Detergent',
+    price: 8.99,
+    category: 'Household',
+    image: '🧺',
+    rating: 4.8,
+    description: 'Laundry detergent with fresh scent.',
+    stock: 30,
+  },
+  {
+    id: 16,
+    name: 'Trash Bags',
+    price: 6.49,
+    category: 'Household',
+    image: '🗑️',
+    rating: 4.5,
+    description: 'Strong trash bags for kitchen and home use.',
+    stock: 45,
+  },
+  {
+    id: 17,
+    name: 'All-Purpose Cleaner',
+    price: 4.99,
+    category: 'Household',
+    image: '🧽',
+    rating: 4.6,
+    description: 'Cleaner for kitchen, counters, and surfaces.',
+    stock: 30,
+  },
+  {
+    id: 18,
+    name: 'Sponges',
+    price: 2.99,
+    category: 'Household',
+    image: '🫧',
+    rating: 4.3,
+    description: 'Cleaning sponges for dishes and surfaces.',
+    stock: 70,
+  },
+]
+
+export const getProducts = (): Product[] => {
+  if (typeof window === 'undefined') {
+    return defaultProducts
+  }
+
+  try {
+    const savedProducts = localStorage.getItem(PRODUCTS_STORAGE_KEY)
+    if (savedProducts) {
+      return JSON.parse(savedProducts)
+    }
+  } catch (error) {
+    console.error('Failed to load products from localStorage:', error)
+    localStorage.removeItem(PRODUCTS_STORAGE_KEY)
+  }
+
+  return defaultProducts
+}
+
+export const saveProducts = (products: Product[]) => {
+  if (typeof window === 'undefined') return
+
+  try {
+    localStorage.setItem(PRODUCTS_STORAGE_KEY, JSON.stringify(products))
+  } catch (error) {
+    console.error('Failed to save products to localStorage:', error)
+  }
+}
+
+export const products =
+  typeof window !== 'undefined' ? getProducts() : defaultProducts
