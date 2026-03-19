@@ -1,17 +1,18 @@
 import Link from 'next/link'
+import Image from 'next/image'
 
 export default function Footer() {
   return (
     <footer className="bg-gray-900 text-white py-12 mt-16">
       <div className="container mx-auto px-4">
         <div className="grid md:grid-cols-4 gap-8">
-
-          {/* About */}
           <div>
             <div className="flex items-center gap-3 mb-4">
-              <img
+              <Image
                 src="/logo.png"
                 alt="AptBites Logo"
+                width={40}
+                height={40}
                 className="w-10 h-10 object-contain rounded-lg bg-white p-1"
               />
               <h3 className="text-xl font-bold">AptBites</h3>
@@ -31,12 +32,12 @@ export default function Footer() {
             </a>
           </div>
 
-          {/* Quick Links */}
           <div>
             <h4 className="text-lg font-semibold mb-4">Quick Links</h4>
             <ul className="space-y-2">
               <li><Link href="/" className="text-gray-400 hover:text-white">Home</Link></li>
               <li><Link href="/products" className="text-gray-400 hover:text-white">Products</Link></li>
+              <li><Link href="/pickup-delivery" className="text-gray-400 hover:text-white">Pickup Delivery</Link></li>
               <li><Link href="/categories/snacks" className="text-gray-400 hover:text-white">Snacks</Link></li>
               <li><Link href="/categories/beverages" className="text-gray-400 hover:text-white">Beverages</Link></li>
               <li><Link href="/categories/household" className="text-gray-400 hover:text-white">Household</Link></li>
@@ -44,7 +45,6 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Delivery Info */}
           <div>
             <h4 className="text-lg font-semibold mb-4">Delivery Info</h4>
             <ul className="space-y-2 text-gray-400">
@@ -52,17 +52,16 @@ export default function Footer() {
               <li>Evening: 6:00 PM - 8:00 PM</li>
               <li>Free delivery in the community</li>
               <li>Same-day or next-morning delivery</li>
+              <li>Pickup service starts at $5</li>
               <li>Cash, Zelle, or Venmo</li>
             </ul>
           </div>
 
-          {/* Contact */}
           <div>
             <h4 className="text-lg font-semibold mb-4">Contact</h4>
             <ul className="space-y-2 text-gray-400">
               <li>📧 getaptbites@gmail.com</li>
               <li>📱 409-276-8534</li>
-
               <li>
                 📸{' '}
                 <a
@@ -74,7 +73,6 @@ export default function Footer() {
                   Instagram
                 </a>
               </li>
-
               <li>
                 📩{' '}
                 <a
@@ -86,7 +84,6 @@ export default function Footer() {
               </li>
             </ul>
           </div>
-
         </div>
 
         <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">

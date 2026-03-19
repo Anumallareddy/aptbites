@@ -10,20 +10,20 @@ export default function Home() {
         <div className="container mx-auto px-4">
           <div className="max-w-3xl">
             <p className="text-sm font-semibold uppercase tracking-wide mb-3 text-white/90">
-              Apartment delivery made simple
+              Apartment convenience, delivered
             </p>
 
             <h1 className="text-4xl md:text-5xl font-bold mb-4 leading-tight">
-              AptBites brings snacks, drinks, and essentials right to your apartment
+              Snacks, drinks, and essentials delivered inside your apartment community
             </h1>
 
             <p className="text-lg md:text-xl mb-4 text-white/90">
-              A simple community delivery store for apartment living.
+              AptBites is a simple local delivery service built for apartment living.
             </p>
 
             <p className="text-base md:text-lg mb-8 text-white/85">
-              Order everyday items for your home without leaving your building.
-              Fast delivery, flexible payment, and easy ordering through cart, text, Instagram, or email.
+              Get everyday items without leaving your building. Order through the site,
+              Instagram, text, or email and enjoy quick, reliable local delivery.
             </p>
 
             <div className="flex gap-3 mb-8 flex-wrap">
@@ -43,7 +43,7 @@ export default function Home() {
                 href="/products"
                 className="bg-white text-primary px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition inline-block text-center"
               >
-                Shop Now
+                Browse Products
               </Link>
 
               <a
@@ -151,8 +151,58 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Instagram / CTA Section */}
+      {/* Pickup Delivery Section */}
       <section className="py-16 bg-white">
+        <div className="container mx-auto px-4">
+          <div className="max-w-5xl mx-auto bg-gray-50 rounded-2xl shadow-md p-8 md:p-10">
+            <div className="grid md:grid-cols-2 gap-8 items-center">
+              <div>
+                <h2 className="text-3xl font-bold text-gray-800 mb-4">
+                  Need something from another store?
+                </h2>
+                <p className="text-gray-600 mb-4">
+                  AptBites also offers local pickup and apartment delivery for nearby stores.
+                  Send us the store name, item list, and your apartment number.
+                </p>
+                <p className="text-gray-700 font-medium mb-6">
+                  Pickup fee starts at $5 depending on distance and order size.
+                </p>
+
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <Link
+                    href="/pickup-delivery"
+                    className="bg-primary text-white px-6 py-3 rounded-lg font-semibold hover:bg-secondary transition text-center"
+                  >
+                    Learn More
+                  </Link>
+
+                  <a
+                    href="https://www.instagram.com/aptbites/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="border border-primary text-primary px-6 py-3 rounded-lg font-semibold hover:bg-primary hover:text-white transition text-center"
+                  >
+                    Request Pickup
+                  </a>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-xl p-6 border border-gray-100">
+                <h3 className="text-xl font-bold text-gray-800 mb-3">Best for</h3>
+                <ul className="space-y-2 text-gray-600">
+                  <li>Nearby store pickups</li>
+                  <li>Quick apartment deliveries</li>
+                  <li>Small grocery and essentials runs</li>
+                  <li>Simple convenience errands</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Final CTA */}
+      <section className="py-16">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto bg-primary text-white rounded-2xl shadow-lg p-8 md:p-10 text-center">
             <h2 className="text-3xl font-bold mb-4">Follow AptBites and place your next order</h2>
