@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react'
 import { Product, CartItem, CartContextType } from '@/types'
+import { getProducts } from '@/data/products'
 
 const CART_STORAGE_KEY = 'aptbites-cart'
 
@@ -15,7 +16,23 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     try {
       const savedCart = localStorage.getItem(CART_STORAGE_KEY)
       if (savedCart) {
-        setCartItems(JSON.parse(savedCart))
+        const parsedCart = JSON.parse(savedCart)
+
+        const sanitizedCart = Array.isArray(parsedCart)
+          ? parsedCart
+              .filter(
+                (item) =>
+                  item &&
+                  typeof item.id === 'number' &&
+                  typeof item.quantity === 'number'
+              )
+              .map((item) => ({
+                id: item.id,
+                quantity: item.quantity,
+              }))
+          : []
+
+        setCartItems(sanitizedCart)
       }
     } catch (error) {
       console.error('Failed to load cart from localStorage:', error)
@@ -47,7 +64,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         )
       }
 
-      return [...prevItems, { ...product, quantity: 1 }]
+      return [...prevItems, { id: product.id, quantity: 1 }]
     })
   }
 
@@ -73,10 +90,12 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   }
 
   const cartCount = cartItems.reduce((sum, item) => sum + item.quantity, 0)
-  const cartTotal = cartItems.reduce(
-    (sum, item) => sum + item.price * item.quantity,
-    0
-  )
+
+  const products = getProducts()
+  const cartTotal = cartItems.reduce((sum, item) => {
+    const product = products.find((p) => p.id === item.id)
+    return sum + (product ? product.price * item.quantity : 0)
+  }, 0)
 
   return (
     <CartContext.Provider

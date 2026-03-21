@@ -1,11 +1,13 @@
 'use client'
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { useCart } from '@/context/CartContext'
+import { getProducts } from '@/data/products'
 
 export default function CartPage() {
-  const { cartItems, removeFromCart, updateQuantity, cartTotal, clearCart } = useCart()
+  const { cartItems, removeFromCart, updateQuantity } = useCart()
 
   const [apartmentNumber, setApartmentNumber] = useState('')
   const [customerName, setCustomerName] = useState('')
@@ -18,9 +20,38 @@ export default function CartPage() {
 
   const taxExemptItems = ['Bottled Water', 'Water']
 
-  const subtotal = cartTotal
+  const products = useMemo(() => getProducts(), [])
 
-  const taxableAmount = cartItems.reduce((sum, item) => {
+  const safeCartItems = useMemo(() => {
+    return cartItems
+      .map((cartItem) => {
+        const product = products.find((p) => p.id === cartItem.id)
+
+        if (!product) return null
+
+        return {
+          id: cartItem.id,
+          quantity: cartItem.quantity,
+          name: product.name,
+          price: product.price,
+          image: product.image,
+        }
+      })
+      .filter(Boolean) as {
+      id: number
+      quantity: number
+      name: string
+      price: number
+      image: string
+    }[]
+  }, [cartItems, products])
+
+  const subtotal = safeCartItems.reduce(
+    (sum, item) => sum + item.price * item.quantity,
+    0
+  )
+
+  const taxableAmount = safeCartItems.reduce((sum, item) => {
     const isTaxExempt = taxExemptItems.some((exempt) =>
       item.name.toLowerCase().includes(exempt.toLowerCase())
     )
@@ -44,7 +75,7 @@ export default function CartPage() {
     message += `Preferred Delivery Time: ${deliveryTimeText}\n\n`
     message += `Order Items:\n`
 
-    cartItems.forEach((item) => {
+    safeCartItems.forEach((item) => {
       message += `- ${item.quantity} x ${item.name} = $${(
         item.price * item.quantity
       ).toFixed(2)}\n`
@@ -89,7 +120,7 @@ export default function CartPage() {
     try {
       await navigator.clipboard.writeText(generateOrderMessage())
       alert(
-        'Order copied. Instagram will open now. Tap "Message", paste your order, and send it.'
+        'Order copied. Instagram will open now. Tap Message, paste your order, and send it.'
       )
     } catch {
       alert(
@@ -97,7 +128,6 @@ export default function CartPage() {
       )
     }
 
-    // IMPORTANT: use location.href (not window.open)
     window.location.href = INSTAGRAM_URL
   }
 
@@ -112,7 +142,35 @@ export default function CartPage() {
     }
   }
 
-  if (cartItems.length === 0) {
+  const renderProductImage = (image: string, name: string) => {
+    const isImagePath =
+      typeof image === 'string' &&
+      (image.startsWith('/') ||
+        image.startsWith('http://') ||
+        image.startsWith('https://'))
+
+    if (isImagePath) {
+      return (
+        <div className="w-20 h-20 bg-white rounded-lg p-2 flex items-center justify-center border">
+          <Image
+            src={image}
+            alt={name}
+            width={64}
+            height={64}
+            className="object-contain w-full h-full"
+          />
+        </div>
+      )
+    }
+
+    return (
+      <div className="w-20 h-20 bg-white rounded-lg p-2 flex items-center justify-center text-5xl border">
+        {image}
+      </div>
+    )
+  }
+
+  if (safeCartItems.length === 0) {
     return (
       <div className="container mx-auto px-4 py-16 text-center">
         <div className="text-6xl mb-4">🛒</div>
@@ -128,7 +186,7 @@ export default function CartPage() {
     )
   }
 
-  const hasTaxExemptItems = cartItems.some((item) =>
+  const hasTaxExemptItems = safeCartItems.some((item) =>
     taxExemptItems.some((exempt) => item.name.toLowerCase().includes(exempt.toLowerCase()))
   )
 
@@ -139,27 +197,45 @@ export default function CartPage() {
       <div className="grid lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2">
           <div className="bg-white rounded-lg shadow-md">
-            {cartItems.map((item) => (
+            {safeCartItems.map((item) => (
               <div key={item.id} className="flex items-center border-b p-6 last:border-b-0">
-                <div className="text-5xl mr-4">{item.image}</div>
+                <div className="mr-4 shrink-0">
+                  {renderProductImage(item.image, item.name)}
+                </div>
 
-                <div className="flex-1">
+                <div className="flex-1 min-w-0">
                   <h3 className="font-semibold text-lg">{item.name}</h3>
                   <p className="text-gray-600">${item.price.toFixed(2)} each</p>
                 </div>
 
                 <div className="flex items-center space-x-4">
-                  <div className="flex items-center border rounded-lg">
-                    <button onClick={() => updateQuantity(item.id, item.quantity - 1)}>-</button>
+                  <div className="flex items-center border rounded-lg overflow-hidden">
+                    <button
+                      onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                      className="px-3 py-2 hover:bg-gray-100"
+                    >
+                      -
+                    </button>
                     <span className="px-4">{item.quantity}</span>
-                    <button onClick={() => updateQuantity(item.id, item.quantity + 1)}>+</button>
+                    <button
+                      onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                      className="px-3 py-2 hover:bg-gray-100"
+                    >
+                      +
+                    </button>
                   </div>
 
-                  <span className="font-semibold">
+                  <span className="font-semibold min-w-[70px] text-right">
                     ${(item.price * item.quantity).toFixed(2)}
                   </span>
 
-                  <button onClick={() => removeFromCart(item.id)}>🗑️</button>
+                  <button
+                    onClick={() => removeFromCart(item.id)}
+                    className="text-gray-500 hover:text-red-600"
+                    aria-label={`Remove ${item.name} from cart`}
+                  >
+                    🗑️
+                  </button>
                 </div>
               </div>
             ))}
@@ -188,22 +264,71 @@ export default function CartPage() {
               placeholder="Phone Number"
               value={phoneNumber}
               onChange={(e) => setPhoneNumber(e.target.value)}
-              className="w-full mb-4 p-2 border rounded"
+              className="w-full mb-2 p-2 border rounded"
             />
 
-            <button onClick={handleInstagramCheckout} className="w-full bg-pink-600 text-white py-3 mb-2 rounded">
+            <select
+              value={deliveryTime}
+              onChange={(e) => setDeliveryTime(e.target.value)}
+              className="w-full mb-4 p-2 border rounded"
+            >
+              <option value="morning">Morning (8:00 AM - 10:00 AM)</option>
+              <option value="evening">Evening (6:00 PM - 8:00 PM)</option>
+            </select>
+
+            <div className="mb-4 text-sm text-gray-700 space-y-1 border rounded p-3 bg-gray-50">
+              <div className="flex justify-between">
+                <span>Subtotal</span>
+                <span>${subtotal.toFixed(2)}</span>
+              </div>
+
+              <div className="flex justify-between">
+                <span>Tax</span>
+                <span>${tax.toFixed(2)}</span>
+              </div>
+
+              <div className="flex justify-between">
+                <span>Delivery</span>
+                <span>FREE</span>
+              </div>
+
+              <div className="flex justify-between font-semibold text-base pt-2 border-t">
+                <span>Total</span>
+                <span>${total.toFixed(2)}</span>
+              </div>
+
+              {hasTaxExemptItems && (
+                <p className="text-xs text-gray-500 pt-2">
+                  Tax-exempt items like bottled water are excluded from sales tax.
+                </p>
+              )}
+            </div>
+
+            <button
+              onClick={handleInstagramCheckout}
+              className="w-full bg-pink-600 text-white py-3 mb-2 rounded"
+            >
               📸 Copy Order & Open Instagram
             </button>
 
-            <button onClick={handleSMSCheckout} className="w-full bg-blue-600 text-white py-3 mb-2 rounded">
+            <button
+              onClick={handleSMSCheckout}
+              className="w-full bg-blue-600 text-white py-3 mb-2 rounded"
+            >
               💬 Text Order
             </button>
 
-            <button onClick={handleEmailCheckout} className="w-full bg-red-600 text-white py-3 mb-2 rounded">
+            <button
+              onClick={handleEmailCheckout}
+              className="w-full bg-red-600 text-white py-3 mb-2 rounded"
+            >
               📧 Email Order
             </button>
 
-            <button onClick={handleCopyOrder} className="w-full bg-gray-600 text-white py-3 rounded">
+            <button
+              onClick={handleCopyOrder}
+              className="w-full bg-gray-600 text-white py-3 rounded"
+            >
               📋 Copy Order
             </button>
           </div>
