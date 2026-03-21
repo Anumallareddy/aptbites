@@ -59,6 +59,7 @@ async function requireAdmin(request: NextRequest) {
   } = await userClient.auth.getUser()
 
   if (error || !user) {
+    console.error('requireAdmin auth error:', error)
     return {
       ok: false as const,
       response: NextResponse.json({ error: 'Unauthorized' }, { status: 401 }),
@@ -79,11 +80,11 @@ async function requireAdmin(request: NextRequest) {
 }
 
 function validateCreatePayload(body: ProductPayload) {
-  if (!body.name || typeof body.name !== 'string') {
+  if (!body.name || typeof body.name !== 'string' || !body.name.trim()) {
     return 'Product name is required'
   }
 
-  if (!body.category || typeof body.category !== 'string') {
+  if (!body.category || typeof body.category !== 'string' || !body.category.trim()) {
     return 'Category is required'
   }
 
@@ -104,6 +105,7 @@ export async function POST(request: NextRequest) {
 
   try {
     const body: ProductPayload = await request.json()
+    console.log('POST /api/admin/products body:', body)
 
     const validationError = validateCreatePayload(body)
     if (validationError) {
@@ -119,6 +121,8 @@ export async function POST(request: NextRequest) {
       description: body.description?.trim() || null,
     }
 
+    console.log('Insert payload:', payload)
+
     const { data, error } = await supabaseAdmin
       .from('products')
       .insert([payload])
@@ -126,11 +130,13 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (error) {
+      console.error('Supabase insert error:', error)
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
     return NextResponse.json(data, { status: 201 })
-  } catch {
+  } catch (error) {
+    console.error('POST route error:', error)
     return NextResponse.json({ error: 'Invalid request body' }, { status: 400 })
   }
 }
@@ -141,6 +147,7 @@ export async function PUT(request: NextRequest) {
 
   try {
     const body: ProductPayload = await request.json()
+    console.log('PUT /api/admin/products body:', body)
 
     if (!body.id || typeof body.id !== 'string') {
       return NextResponse.json({ error: 'Product id is required' }, { status: 400 })
@@ -152,12 +159,14 @@ export async function PUT(request: NextRequest) {
     if (typeof body.category === 'string') updates.category = body.category.trim()
     if (typeof body.price === 'number' && !Number.isNaN(body.price)) updates.price = body.price
     if (typeof body.stock === 'number' && !Number.isNaN(body.stock)) updates.stock = body.stock
-    if (typeof body.image_url === 'string') updates.image_url = body.image_url.trim()
+    if (typeof body.image_url === 'string') updates.image = body.image_url.trim()
     if (typeof body.description === 'string') updates.description = body.description.trim()
 
     if (Object.keys(updates).length === 0) {
       return NextResponse.json({ error: 'No valid fields to update' }, { status: 400 })
     }
+
+    console.log('Update payload:', { id: body.id, updates })
 
     const { data, error } = await supabaseAdmin
       .from('products')
@@ -167,11 +176,13 @@ export async function PUT(request: NextRequest) {
       .single()
 
     if (error) {
+      console.error('Supabase update error:', error)
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
     return NextResponse.json(data, { status: 200 })
-  } catch {
+  } catch (error) {
+    console.error('PUT route error:', error)
     return NextResponse.json({ error: 'Invalid request body' }, { status: 400 })
   }
 }
@@ -180,21 +191,29 @@ export async function DELETE(request: NextRequest) {
   const auth = await requireAdmin(request)
   if (!auth.ok) return auth.response
 
-  const { searchParams } = new URL(request.url)
-  const id = searchParams.get('id')
+  try {
+    const { searchParams } = new URL(request.url)
+    const id = searchParams.get('id')
 
-  if (!id) {
-    return NextResponse.json({ error: 'Product id is required' }, { status: 400 })
+    if (!id) {
+      return NextResponse.json({ error: 'Product id is required' }, { status: 400 })
+    }
+
+    console.log('DELETE /api/admin/products id:', id)
+
+    const { error } = await supabaseAdmin
+      .from('products')
+      .delete()
+      .eq('id', id)
+
+    if (error) {
+      console.error('Supabase delete error:', error)
+      return NextResponse.json({ error: error.message }, { status: 500 })
+    }
+
+    return NextResponse.json({ success: true }, { status: 200 })
+  } catch (error) {
+    console.error('DELETE route error:', error)
+    return NextResponse.json({ error: 'Failed to delete product' }, { status: 400 })
   }
-
-  const { error } = await supabaseAdmin
-    .from('products')
-    .delete()
-    .eq('id', id)
-
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
-  }
-
-  return NextResponse.json({ success: true }, { status: 200 })
 }
