@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import ProductCard from './ProductCard'
-import { getProducts } from '@/data/products'
+import { supabase } from '@/lib/supabase'
 import { Product } from '@/types'
 
 interface ProductGridProps {
@@ -21,19 +21,21 @@ export default function ProductGrid({
   const [products, setProducts] = useState<Product[]>([])
 
   useEffect(() => {
-    const loadProducts = () => {
-      setProducts(getProducts())
+    const fetchProducts = async () => {
+      const { data, error } = await supabase.from('products').select('*')
+
+      console.log('SUPABASE DATA:', data)
+      console.log('SUPABASE ERROR:', error)
+
+      if (error) {
+        console.error('Error fetching products:', error)
+        return
+      }
+
+      setProducts(data || [])
     }
 
-    loadProducts()
-
-    window.addEventListener('storage', loadProducts)
-    window.addEventListener('focus', loadProducts)
-
-    return () => {
-      window.removeEventListener('storage', loadProducts)
-      window.removeEventListener('focus', loadProducts)
-    }
+    fetchProducts()
   }, [])
 
   let displayProducts = [...products]
