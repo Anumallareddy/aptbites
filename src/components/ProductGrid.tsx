@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import ProductCard from './ProductCard'
-import { supabase } from '@/lib/supabase'
+import { supabase } from '@/lib/supabase/client'
 import { Product } from '@/types'
 
 interface ProductGridProps {

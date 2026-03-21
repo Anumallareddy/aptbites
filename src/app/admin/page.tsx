@@ -1,75 +1,157 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { supabase } from '@/lib/supabase'
-import { Product } from '@/types'
+import { useEffect, useState } from 'react'
+import { supabase } from '@/lib/supabase/client'
 
 type Category = 'Snacks' | 'Beverages' | 'Household'
 
+type AdminProduct = {
+  id: number
+  name: string
+  price: number
+  category: Category
+  image: string
+  rating: number
+  description: string
+  stock: number
+}
+
+type ProductRow = {
+  id: number
+  name: string
+  price: number
+  category: Category
+  image?: string | null
+  rating?: number | null
+  description?: string | null
+  stock?: number | null
+}
+
 export default function AdminDashboard() {
-  const [products, setProducts] = useState<Product[]>([])
+  const [products, setProducts] = useState<AdminProduct[]>([])
   const [isEditing, setIsEditing] = useState(false)
-  const [editingProduct, setEditingProduct] = useState<Product | null>(null)
+  const [editingProduct, setEditingProduct] = useState<AdminProduct | null>(null)
   const [showAddForm, setShowAddForm] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [authLoading, setAuthLoading] = useState(true)
+  const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [isAuthenticated, setIsAuthenticated] = useState(false)
-  const [loading, setLoading] = useState(true)
 
-  const ADMIN_PASSWORD = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || 'aptbites2026'
+  const mapRowToProduct = (row: ProductRow): AdminProduct => ({
+    id: row.id,
+    name: row.name ?? '',
+    price: typeof row.price === 'number' ? row.price : 0,
+    category: (row.category as Category) ?? 'Snacks',
+    image: row.image ?? '🛒',
+    rating: typeof row.rating === 'number' ? row.rating : 4,
+    description: row.description ?? '',
+    stock: typeof row.stock === 'number' ? row.stock : 0,
+  })
+
+  const fetchProducts = async () => {
+    setLoading(true)
+
+    const { data, error } = await supabase
+      .from('products')
+      .select('*')
+      .order('id', { ascending: true })
+
+    if (error) {
+      console.error('Error fetching admin products:', error)
+      setProducts([])
+    } else {
+      const mapped = ((data as ProductRow[]) || []).map(mapRowToProduct)
+      setProducts(mapped)
+    }
+
+    setLoading(false)
+  }
 
   useEffect(() => {
-    const auth = localStorage.getItem('adminAuth')
-    if (auth === 'true') {
-      setIsAuthenticated(true)
+    let mounted = true
+
+    const initAuth = async () => {
+      try {
+        const {
+          data: { session },
+        } = await supabase.auth.getSession()
+
+        if (!mounted) return
+        setIsAuthenticated(!!session)
+      } catch (error) {
+        console.error('Session restore error:', error)
+        if (!mounted) return
+        setIsAuthenticated(false)
+      } finally {
+        if (mounted) {
+          setAuthLoading(false)
+        }
+      }
+    }
+
+    initAuth()
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!mounted) return
+      setIsAuthenticated(!!session)
+      setAuthLoading(false)
+    })
+
+    return () => {
+      mounted = false
+      subscription.unsubscribe()
     }
   }, [])
 
   useEffect(() => {
     if (!isAuthenticated) {
+      setProducts([])
       setLoading(false)
       return
-    }
-
-    const fetchProducts = async () => {
-      setLoading(true)
-
-      const { data, error } = await supabase
-        .from('products')
-        .select('*')
-        .order('id', { ascending: true })
-
-      if (error) {
-        console.error('Error fetching admin products:', error)
-        setProducts([])
-      } else {
-        setProducts(data || [])
-      }
-
-      setLoading(false)
     }
 
     fetchProducts()
   }, [isAuthenticated])
 
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault()
+  const getAccessToken = async () => {
+    const {
+      data: { session },
+    } = await supabase.auth.getSession()
 
-    if (password === ADMIN_PASSWORD) {
-      setIsAuthenticated(true)
-      localStorage.setItem('adminAuth', 'true')
-      setPassword('')
-    } else {
-      alert('Incorrect password')
-    }
+    return session?.access_token ?? null
   }
 
-  const handleLogout = () => {
-    setIsAuthenticated(false)
-    localStorage.removeItem('adminAuth')
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault()
+
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    })
+
+    if (error) {
+      console.error('Login error:', error)
+      alert(error.message || 'Login failed')
+      return
+    }
+
+    setEmail('')
     setPassword('')
   }
 
-  const handleEdit = (product: Product) => {
+  const handleLogout = async () => {
+    const { error } = await supabase.auth.signOut()
+
+    if (error) {
+      console.error('Logout error:', error)
+      alert(error.message || 'Logout failed')
+    }
+  }
+
+  const handleEdit = (product: AdminProduct) => {
     setEditingProduct({ ...product })
     setIsEditing(true)
     setShowAddForm(false)
@@ -78,99 +160,107 @@ export default function AdminDashboard() {
   const handleDelete = async (productId: number) => {
     const confirmDelete = confirm('Are you sure you want to delete this product?')
     if (!confirmDelete) return
-  
-    const { error } = await supabase
-      .from('products')
-      .delete()
-      .eq('id', productId)
-  
-    if (error) {
-      console.error('Error deleting product:', error)
-      alert('Failed to delete product')
+
+    const accessToken = await getAccessToken()
+
+    if (!accessToken) {
+      alert('You must be logged in')
       return
     }
-  
-    const { data, error: fetchError } = await supabase
-      .from('products')
-      .select('*')
-      .order('id', { ascending: true })
-  
-    if (fetchError) {
-      console.error('Error refreshing products:', fetchError)
-    } else {
-      setProducts(data || [])
+
+    const res = await fetch(`/api/admin/products?id=${productId}`, {
+      method: 'DELETE',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    })
+
+    const data = await res.json()
+
+    if (!res.ok) {
+      console.error('Error deleting product:', data)
+      alert(data.error || 'Failed to delete product')
+      return
     }
+
+    await fetchProducts()
   }
 
   const handleSave = async () => {
     if (!editingProduct) return
-  
-    const { error } = await supabase
-      .from('products')
-      .update({
+
+    const accessToken = await getAccessToken()
+
+    if (!accessToken) {
+      alert('You must be logged in')
+      return
+    }
+
+    const res = await fetch('/api/admin/products', {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify({
+        id: String(editingProduct.id),
         name: editingProduct.name,
         price: editingProduct.price,
         category: editingProduct.category,
-        image: editingProduct.image,
-        rating: editingProduct.rating,
+        image_url: editingProduct.image,
         description: editingProduct.description,
         stock: editingProduct.stock,
-      })
-      .eq('id', editingProduct.id)
-  
-    if (error) {
-      console.error('Error updating product:', error)
-      alert('Failed to update product')
+      }),
+    })
+
+    const data = await res.json()
+
+    if (!res.ok) {
+      console.error('Error updating product:', data)
+      alert(data.error || 'Failed to update product')
       return
     }
-  
-    const { data, error: fetchError } = await supabase
-      .from('products')
-      .select('*')
-      .order('id', { ascending: true })
-  
-    if (fetchError) {
-      console.error('Error refreshing products:', fetchError)
-    } else {
-      setProducts(data || [])
-    }
-  
+
+    await fetchProducts()
     setIsEditing(false)
     setEditingProduct(null)
   }
 
   const handleAdd = async () => {
     if (!editingProduct) return
-  
-    const { error } = await supabase.from('products').insert([
-      {
+
+    const accessToken = await getAccessToken()
+
+    if (!accessToken) {
+      alert('You must be logged in')
+      return
+    }
+
+    const res = await fetch('/api/admin/products', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify({
         name: editingProduct.name,
         price: editingProduct.price,
         category: editingProduct.category,
-        image: editingProduct.image,
-        rating: editingProduct.rating,
+        image_url: editingProduct.image,
         description: editingProduct.description,
         stock: editingProduct.stock,
-      },
-    ])
-  
-    if (error) {
-      console.error('Error adding product:', error)
-      alert('Failed to add product')
+      }),
+    })
+
+    const data = await res.json()
+
+    if (!res.ok) {
+      console.error('Error adding product:', data)
+      alert(data.error || 'Failed to add product')
       return
     }
-  
-    const { data, error: fetchError } = await supabase
-      .from('products')
-      .select('*')
-      .order('id', { ascending: true })
-  
-    if (fetchError) {
-      console.error('Error refreshing products:', fetchError)
-    } else {
-      setProducts(data || [])
-    }
-  
+
+    await fetchProducts()
     setShowAddForm(false)
     setEditingProduct(null)
   }
@@ -182,7 +272,7 @@ export default function AdminDashboard() {
       price: 0,
       category: 'Snacks',
       image: '🛒',
-      rating: 4.0,
+      rating: 4,
       description: '',
       stock: 0,
     })
@@ -192,10 +282,21 @@ export default function AdminDashboard() {
 
   const handleCategoryChange = (value: string) => {
     if (!editingProduct) return
+
     setEditingProduct({
       ...editingProduct,
       category: value as Category,
     })
+  }
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+        <div className="bg-white p-6 rounded-xl shadow-md w-full max-w-sm text-center">
+          <h2 className="text-xl font-bold text-gray-800">Checking session...</h2>
+        </div>
+      </div>
+    )
   }
 
   if (!isAuthenticated) {
@@ -204,8 +305,17 @@ export default function AdminDashboard() {
         <form onSubmit={handleLogin} className="bg-white p-6 rounded-xl shadow-md w-full max-w-sm">
           <h2 className="text-2xl font-bold mb-2 text-gray-800">Admin Login</h2>
           <p className="text-sm text-gray-500 mb-4">
-            This is a simple MVP admin login for local product management.
+            Sign in with your Supabase admin account.
           </p>
+
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Admin email"
+            className="border p-3 w-full mb-3 rounded-lg"
+            required
+          />
 
           <input
             type="password"
@@ -213,6 +323,7 @@ export default function AdminDashboard() {
             onChange={(e) => setPassword(e.target.value)}
             placeholder="Password"
             className="border p-3 w-full mb-4 rounded-lg"
+            required
           />
 
           <button className="bg-black text-white px-4 py-3 w-full rounded-lg font-semibold">
@@ -242,189 +353,208 @@ export default function AdminDashboard() {
       </div>
 
       {(isEditing || showAddForm) && editingProduct && (
-  <div className="bg-white p-6 mb-6 rounded-xl shadow-md">
-    <h2 className="text-xl font-bold mb-4 text-gray-800">
-      {showAddForm ? 'Add Product' : 'Edit Product'}
-    </h2>
+        <div className="bg-white p-6 mb-6 rounded-xl shadow-md">
+          <h2 className="text-xl font-bold mb-4 text-gray-800">
+            {showAddForm ? 'Add Product' : 'Edit Product'}
+          </h2>
 
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Product Name
-        </label>
-        <input
-          value={editingProduct.name}
-          onChange={(e) =>
-            setEditingProduct({ ...editingProduct, name: e.target.value })
-          }
-          placeholder="Example: Coca-Cola 12 oz Can"
-          className="border p-3 w-full rounded-lg"
-        />
-      </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Product Name
+              </label>
+              <input
+                value={editingProduct.name}
+                onChange={(e) =>
+                  setEditingProduct({ ...editingProduct, name: e.target.value })
+                }
+                placeholder="Example: Coca-Cola 12 oz Can"
+                className="border p-3 w-full rounded-lg"
+              />
+            </div>
 
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Price
-        </label>
-        <input
-          type="number"
-          step="0.01"
-          value={editingProduct.price}
-          onChange={(e) =>
-            setEditingProduct({
-              ...editingProduct,
-              price: parseFloat(e.target.value) || 0,
-            })
-          }
-          placeholder="Example: 1.99"
-          className="border p-3 w-full rounded-lg"
-        />
-      </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Price
+              </label>
+              <input
+                type="number"
+                step="0.01"
+                value={editingProduct.price}
+                onChange={(e) =>
+                  setEditingProduct({
+                    ...editingProduct,
+                    price: Number(e.target.value),
+                  })
+                }
+                placeholder="2.99"
+                className="border p-3 w-full rounded-lg"
+              />
+            </div>
 
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Category
-        </label>
-        <select
-          value={editingProduct.category}
-          onChange={(e) => handleCategoryChange(e.target.value)}
-          className="border p-3 w-full rounded-lg"
-        >
-          <option value="Snacks">Snacks</option>
-          <option value="Beverages">Beverages</option>
-          <option value="Household">Household</option>
-        </select>
-      </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Category
+              </label>
+              <select
+                value={editingProduct.category}
+                onChange={(e) => handleCategoryChange(e.target.value)}
+                className="border p-3 w-full rounded-lg"
+              >
+                <option value="Snacks">Snacks</option>
+                <option value="Beverages">Beverages</option>
+                <option value="Household">Household</option>
+              </select>
+            </div>
 
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Image Path or Emoji
-        </label>
-        <input
-          value={editingProduct.image}
-          onChange={(e) =>
-            setEditingProduct({ ...editingProduct, image: e.target.value })
-          }
-          placeholder="Example: /coke.png or 🥤"
-          className="border p-3 w-full rounded-lg"
-        />
-      </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Image / Emoji / URL
+              </label>
+              <input
+                value={editingProduct.image}
+                onChange={(e) =>
+                  setEditingProduct({ ...editingProduct, image: e.target.value })
+                }
+                placeholder="🛒 or image URL"
+                className="border p-3 w-full rounded-lg"
+              />
+            </div>
 
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Rating
-        </label>
-        <input
-          type="number"
-          step="0.1"
-          min="0"
-          max="5"
-          value={editingProduct.rating}
-          onChange={(e) =>
-            setEditingProduct({
-              ...editingProduct,
-              rating: parseFloat(e.target.value) || 0,
-            })
-          }
-          placeholder="Example: 4.5"
-          className="border p-3 w-full rounded-lg"
-        />
-      </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Stock
+              </label>
+              <input
+                type="number"
+                value={editingProduct.stock}
+                onChange={(e) =>
+                  setEditingProduct({
+                    ...editingProduct,
+                    stock: Number(e.target.value),
+                  })
+                }
+                placeholder="10"
+                className="border p-3 w-full rounded-lg"
+              />
+            </div>
 
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Stock
-        </label>
-        <input
-          type="number"
-          value={editingProduct.stock ?? 0}
-          onChange={(e) =>
-            setEditingProduct({
-              ...editingProduct,
-              stock: parseInt(e.target.value) || 0,
-            })
-          }
-          placeholder="Example: 50"
-          className="border p-3 w-full rounded-lg"
-        />
-      </div>
-    </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Rating
+              </label>
+              <input
+                type="number"
+                step="0.1"
+                value={editingProduct.rating}
+                onChange={(e) =>
+                  setEditingProduct({
+                    ...editingProduct,
+                    rating: Number(e.target.value),
+                  })
+                }
+                placeholder="4.5"
+                className="border p-3 w-full rounded-lg"
+                disabled
+              />
+            </div>
 
-    <div className="mt-4">
-      <label className="block text-sm font-medium text-gray-700 mb-1">
-        Description
-      </label>
-      <textarea
-        value={editingProduct.description ?? ''}
-        onChange={(e) =>
-          setEditingProduct({
-            ...editingProduct,
-            description: e.target.value,
-          })
-        }
-        placeholder="Write a short product description"
-        className="border p-3 w-full rounded-lg min-h-[100px]"
-      />
-    </div>
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Description
+              </label>
+              <textarea
+                value={editingProduct.description}
+                onChange={(e) =>
+                  setEditingProduct({
+                    ...editingProduct,
+                    description: e.target.value,
+                  })
+                }
+                placeholder="Describe the product"
+                className="border p-3 w-full rounded-lg min-h-[120px]"
+              />
+            </div>
+          </div>
 
-    <div className="flex gap-3 mt-5">
-      <button
-        onClick={showAddForm ? handleAdd : handleSave}
-        className="bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold"
-      >
-        Save
-      </button>
+          <div className="flex gap-3 mt-6">
+            <button
+              onClick={showAddForm ? handleAdd : handleSave}
+              className="bg-black text-white px-4 py-2 rounded-lg font-semibold"
+            >
+              {showAddForm ? 'Add Product' : 'Save Changes'}
+            </button>
 
-      <button
-        onClick={() => {
-          setEditingProduct(null)
-          setShowAddForm(false)
-          setIsEditing(false)
-        }}
-        className="bg-gray-400 text-white px-4 py-2 rounded-lg font-semibold"
-      >
-        Cancel
-      </button>
-    </div>
-  </div>
-)}
+            <button
+              onClick={() => {
+                setIsEditing(false)
+                setShowAddForm(false)
+                setEditingProduct(null)
+              }}
+              className="border border-gray-300 px-4 py-2 rounded-lg font-semibold"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
 
-      <div className="bg-white rounded-xl shadow-md overflow-x-auto">
+      <div className="bg-white rounded-xl shadow-md overflow-hidden">
+        <div className="p-4 border-b border-gray-200">
+          <h2 className="text-xl font-bold text-gray-800">Products</h2>
+        </div>
+
         {loading ? (
           <div className="p-6 text-gray-500">Loading products...</div>
+        ) : products.length === 0 ? (
+          <div className="p-6 text-gray-500">No products found.</div>
         ) : (
-          <table className="w-full border-collapse">
-            <thead className="bg-gray-100">
-              <tr>
-                <th className="text-left p-3">Name</th>
-                <th className="text-left p-3">Category</th>
-                <th className="text-left p-3">Price</th>
-                <th className="text-left p-3">Image</th>
-                <th className="text-left p-3">Stock</th>
-                <th className="text-left p-3">Actions</th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {products.map((p) => (
-                <tr key={p.id} className="border-t">
-                  <td className="p-3">{p.name}</td>
-                  <td className="p-3">{p.category}</td>
-                  <td className="p-3">${p.price.toFixed(2)}</td>
-                  <td className="p-3">{p.image}</td>
-                  <td className="p-3">{p.stock ?? 0}</td>
-                  <td className="p-3">
-                    <button onClick={() => handleEdit(p)} className="mr-3 text-blue-600 font-medium">
-                      Edit
-                    </button>
-                    <button onClick={() => handleDelete(p.id)} className="text-red-600 font-medium">
-                      Delete
-                    </button>
-                  </td>
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[900px]">
+              <thead className="bg-gray-50">
+                <tr className="text-left text-sm text-gray-600">
+                  <th className="px-4 py-3">ID</th>
+                  <th className="px-4 py-3">Image</th>
+                  <th className="px-4 py-3">Name</th>
+                  <th className="px-4 py-3">Category</th>
+                  <th className="px-4 py-3">Price</th>
+                  <th className="px-4 py-3">Stock</th>
+                  <th className="px-4 py-3">Description</th>
+                  <th className="px-4 py-3">Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+
+              <tbody>
+                {products.map((product) => (
+                  <tr key={product.id} className="border-t border-gray-100 align-top">
+                    <td className="px-4 py-3 text-sm text-gray-700">{product.id}</td>
+                    <td className="px-4 py-3 text-2xl">{product.image}</td>
+                    <td className="px-4 py-3 font-medium text-gray-800">{product.name}</td>
+                    <td className="px-4 py-3 text-gray-700">{product.category}</td>
+                    <td className="px-4 py-3 text-gray-700">${product.price.toFixed(2)}</td>
+                    <td className="px-4 py-3 text-gray-700">{product.stock}</td>
+                    <td className="px-4 py-3 text-gray-700 max-w-xs">{product.description}</td>
+                    <td className="px-4 py-3">
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => handleEdit(product)}
+                          className="bg-blue-600 text-white px-3 py-1 rounded-md text-sm"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleDelete(product.id)}
+                          className="bg-red-600 text-white px-3 py-1 rounded-md text-sm"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
     </div>
