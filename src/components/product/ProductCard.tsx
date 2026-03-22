@@ -12,10 +12,12 @@ interface ProductCardProps {
 export default function ProductCard({ product }: ProductCardProps) {
   const { addToCart } = useCart()
   const [added, setAdded] = useState(false)
+  const [animateCard, setAnimateCard] = useState(false)
 
   const isOutOfStock = product.stock === 0
   const isLowStock =
     product.stock !== undefined && product.stock > 0 && product.stock < 20
+
   const isImagePath =
     !!product.image &&
     (product.image.startsWith('/') ||
@@ -27,6 +29,7 @@ export default function ProductCard({ product }: ProductCardProps) {
 
     addToCart(product)
     setAdded(true)
+    setAnimateCard(true)
   }
 
   useEffect(() => {
@@ -34,13 +37,27 @@ export default function ProductCard({ product }: ProductCardProps) {
 
     const timer = setTimeout(() => {
       setAdded(false)
-    }, 1200)
+    }, 1000)
 
     return () => clearTimeout(timer)
   }, [added])
 
+  useEffect(() => {
+    if (!animateCard) return
+
+    const timer = setTimeout(() => {
+      setAnimateCard(false)
+    }, 350)
+
+    return () => clearTimeout(timer)
+  }, [animateCard])
+
   return (
-    <div className="group flex h-full flex-col overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
+    <div
+      className={`group flex h-full flex-col overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg ${
+        animateCard ? 'animate-card-pop' : ''
+      }`}
+    >
       <div className="relative flex h-52 items-center justify-center overflow-hidden bg-gray-50 p-5">
         {product.rating >= 4.7 && (
           <div className="absolute left-3 top-3 rounded-full bg-yellow-400 px-2.5 py-1 text-[11px] font-semibold text-gray-900">
@@ -60,12 +77,18 @@ export default function ProductCard({ product }: ProductCardProps) {
               src={product.image}
               alt={product.name}
               fill
-              className="object-contain transition-transform duration-300 group-hover:scale-105"
+              className={`object-contain transition-transform duration-300 group-hover:scale-105 ${
+                added ? 'scale-105' : ''
+              }`}
               sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 300px"
             />
           </div>
         ) : (
-          <div className="flex items-center justify-center text-7xl transition-transform duration-300 group-hover:scale-105">
+          <div
+            className={`flex items-center justify-center text-7xl transition-transform duration-300 group-hover:scale-105 ${
+              added ? 'scale-105' : ''
+            }`}
+          >
             {product.image}
           </div>
         )}
@@ -97,7 +120,7 @@ export default function ProductCard({ product }: ProductCardProps) {
 
           <button
             onClick={handleAddToCart}
-            disabled={added || isOutOfStock}
+            disabled={isOutOfStock}
             className={`inline-flex min-w-[120px] items-center justify-center rounded-xl px-4 py-2.5 text-sm font-semibold text-white transition-all duration-200 ${
               isOutOfStock
                 ? 'cursor-not-allowed bg-gray-300'

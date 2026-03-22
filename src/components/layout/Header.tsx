@@ -4,9 +4,22 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { ShoppingCart } from 'lucide-react'
 import { useCart } from '@/context/CartContext'
+import { useEffect, useState } from 'react'
 
 export default function Header() {
   const { cartCount } = useCart()
+  const [animateBadge, setAnimateBadge] = useState(false)
+
+  useEffect(() => {
+    if (cartCount === 0) return
+
+    setAnimateBadge(true)
+    const timer = setTimeout(() => {
+      setAnimateBadge(false)
+    }, 350)
+
+    return () => clearTimeout(timer)
+  }, [cartCount])
 
   return (
     <header className="sticky top-0 z-50 border-b border-gray-100 bg-white/95 shadow-sm backdrop-blur">
@@ -49,7 +62,11 @@ export default function Header() {
             <span>Cart</span>
 
             {cartCount > 0 && (
-              <span className="flex h-5 min-w-[20px] items-center justify-center rounded-full bg-accent px-1 text-xs font-semibold text-white">
+              <span
+                className={`flex h-5 min-w-[20px] items-center justify-center rounded-full bg-accent px-1 text-xs font-semibold text-white ${
+                  animateBadge ? 'animate-cart-bump' : ''
+                }`}
+              >
                 {cartCount}
               </span>
             )}
