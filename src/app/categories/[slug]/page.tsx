@@ -1,7 +1,7 @@
 'use client'
 
 import { useParams } from 'next/navigation'
-import ProductGrid from '@/components/ProductGrid'
+import ProductGrid from '@/components/product/ProductGrid'
 import Link from 'next/link'
 
 const categoryInfo: Record<string, { name: string; icon: string; description: string }> = {

@@ -1,9 +1,10 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import ProductCard from './ProductCard'
+import ProductCard from '@/components/product/ProductCard'
 import { supabase } from '@/lib/supabase/client'
 import { Product } from '@/types'
+
 
 interface ProductGridProps {
   featured?: boolean

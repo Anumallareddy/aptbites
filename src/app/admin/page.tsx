@@ -49,25 +49,6 @@ export default function AdminDashboard() {
     stock: typeof row.stock === 'number' ? row.stock : 0,
   })
 
-  const fetchProducts = async () => {
-    setLoading(true)
-
-    const { data, error } = await supabase
-      .from('products')
-      .select('*')
-      .order('id', { ascending: true })
-
-    if (error) {
-      console.error('Error fetching admin products:', error)
-      setProducts([])
-    } else {
-      const mapped = ((data as ProductRow[]) || []).map(mapRowToProduct)
-      setProducts(mapped)
-    }
-
-    setLoading(false)
-  }
-
   useEffect(() => {
     let mounted = true
 
@@ -107,6 +88,25 @@ export default function AdminDashboard() {
   }, [])
 
   useEffect(() => {
+    const fetchProducts = async () => {
+      setLoading(true)
+
+      const { data, error } = await supabase
+        .from('products')
+        .select('*')
+        .order('id', { ascending: true })
+
+      if (error) {
+        console.error('Error fetching admin products:', error)
+        setProducts([])
+      } else {
+        const mapped = ((data as ProductRow[]) || []).map(mapRowToProduct)
+        setProducts(mapped)
+      }
+
+      setLoading(false)
+    }
+
     if (!isAuthenticated) {
       setProducts([])
       setLoading(false)
@@ -122,6 +122,25 @@ export default function AdminDashboard() {
     } = await supabase.auth.getSession()
 
     return session?.access_token ?? null
+  }
+
+  const refreshProducts = async () => {
+    setLoading(true)
+
+    const { data, error } = await supabase
+      .from('products')
+      .select('*')
+      .order('id', { ascending: true })
+
+    if (error) {
+      console.error('Error fetching admin products:', error)
+      setProducts([])
+    } else {
+      const mapped = ((data as ProductRow[]) || []).map(mapRowToProduct)
+      setProducts(mapped)
+    }
+
+    setLoading(false)
   }
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -183,7 +202,7 @@ export default function AdminDashboard() {
       return
     }
 
-    await fetchProducts()
+    await refreshProducts()
   }
 
   const handleSave = async () => {
@@ -221,7 +240,7 @@ export default function AdminDashboard() {
       return
     }
 
-    await fetchProducts()
+    await refreshProducts()
     setIsEditing(false)
     setEditingProduct(null)
   }
@@ -260,7 +279,7 @@ export default function AdminDashboard() {
       return
     }
 
-    await fetchProducts()
+    await refreshProducts()
     setShowAddForm(false)
     setEditingProduct(null)
   }
@@ -291,8 +310,8 @@ export default function AdminDashboard() {
 
   if (authLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
-        <div className="bg-white p-6 rounded-xl shadow-md w-full max-w-sm text-center">
+      <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
+        <div className="w-full max-w-sm rounded-xl bg-white p-6 text-center shadow-md">
           <h2 className="text-xl font-bold text-gray-800">Checking session...</h2>
         </div>
       </div>
@@ -301,10 +320,10 @@ export default function AdminDashboard() {
 
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
-        <form onSubmit={handleLogin} className="bg-white p-6 rounded-xl shadow-md w-full max-w-sm">
-          <h2 className="text-2xl font-bold mb-2 text-gray-800">Admin Login</h2>
-          <p className="text-sm text-gray-500 mb-4">
+      <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
+        <form onSubmit={handleLogin} className="w-full max-w-sm rounded-xl bg-white p-6 shadow-md">
+          <h2 className="mb-2 text-2xl font-bold text-gray-800">Admin Login</h2>
+          <p className="mb-4 text-sm text-gray-500">
             Sign in with your Supabase admin account.
           </p>
 
@@ -313,7 +332,7 @@ export default function AdminDashboard() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="Admin email"
-            className="border p-3 w-full mb-3 rounded-lg"
+            className="mb-3 w-full rounded-lg border p-3"
             required
           />
 
@@ -322,11 +341,11 @@ export default function AdminDashboard() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="Password"
-            className="border p-3 w-full mb-4 rounded-lg"
+            className="mb-4 w-full rounded-lg border p-3"
             required
           />
 
-          <button className="bg-black text-white px-4 py-3 w-full rounded-lg font-semibold">
+          <button className="w-full rounded-lg bg-black px-4 py-3 font-semibold text-white">
             Login
           </button>
         </form>
@@ -335,32 +354,32 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-3">
+    <div className="min-h-screen bg-gray-50 p-6">
+      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="text-3xl font-bold text-gray-800">Admin Dashboard</h1>
-        <button onClick={handleLogout} className="text-red-500 font-medium">
+        <button onClick={handleLogout} className="font-medium text-red-500">
           Logout
         </button>
       </div>
 
-      <div className="flex flex-wrap gap-3 mb-6">
+      <div className="mb-6 flex flex-wrap gap-3">
         <button
           onClick={handleAddNew}
-          className="bg-green-600 text-white px-4 py-2 rounded-lg font-semibold"
+          className="rounded-lg bg-green-600 px-4 py-2 font-semibold text-white"
         >
           Add Product
         </button>
       </div>
 
       {(isEditing || showAddForm) && editingProduct && (
-        <div className="bg-white p-6 mb-6 rounded-xl shadow-md">
-          <h2 className="text-xl font-bold mb-4 text-gray-800">
+        <div className="mb-6 rounded-xl bg-white p-6 shadow-md">
+          <h2 className="mb-4 text-xl font-bold text-gray-800">
             {showAddForm ? 'Add Product' : 'Edit Product'}
           </h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="mb-1 block text-sm font-medium text-gray-700">
                 Product Name
               </label>
               <input
@@ -369,12 +388,12 @@ export default function AdminDashboard() {
                   setEditingProduct({ ...editingProduct, name: e.target.value })
                 }
                 placeholder="Example: Coca-Cola 12 oz Can"
-                className="border p-3 w-full rounded-lg"
+                className="w-full rounded-lg border p-3"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="mb-1 block text-sm font-medium text-gray-700">
                 Price
               </label>
               <input
@@ -388,18 +407,18 @@ export default function AdminDashboard() {
                   })
                 }
                 placeholder="2.99"
-                className="border p-3 w-full rounded-lg"
+                className="w-full rounded-lg border p-3"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="mb-1 block text-sm font-medium text-gray-700">
                 Category
               </label>
               <select
                 value={editingProduct.category}
                 onChange={(e) => handleCategoryChange(e.target.value)}
-                className="border p-3 w-full rounded-lg"
+                className="w-full rounded-lg border p-3"
               >
                 <option value="Snacks">Snacks</option>
                 <option value="Beverages">Beverages</option>
@@ -408,7 +427,7 @@ export default function AdminDashboard() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="mb-1 block text-sm font-medium text-gray-700">
                 Image / Emoji / URL
               </label>
               <input
@@ -417,12 +436,12 @@ export default function AdminDashboard() {
                   setEditingProduct({ ...editingProduct, image: e.target.value })
                 }
                 placeholder="🛒 or image URL"
-                className="border p-3 w-full rounded-lg"
+                className="w-full rounded-lg border p-3"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="mb-1 block text-sm font-medium text-gray-700">
                 Stock
               </label>
               <input
@@ -435,12 +454,12 @@ export default function AdminDashboard() {
                   })
                 }
                 placeholder="10"
-                className="border p-3 w-full rounded-lg"
+                className="w-full rounded-lg border p-3"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="mb-1 block text-sm font-medium text-gray-700">
                 Rating
               </label>
               <input
@@ -454,13 +473,13 @@ export default function AdminDashboard() {
                   })
                 }
                 placeholder="4.5"
-                className="border p-3 w-full rounded-lg"
+                className="w-full rounded-lg border p-3"
                 disabled
               />
             </div>
 
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="mb-1 block text-sm font-medium text-gray-700">
                 Description
               </label>
               <textarea
@@ -472,15 +491,15 @@ export default function AdminDashboard() {
                   })
                 }
                 placeholder="Describe the product"
-                className="border p-3 w-full rounded-lg min-h-[120px]"
+                className="min-h-[120px] w-full rounded-lg border p-3"
               />
             </div>
           </div>
 
-          <div className="flex gap-3 mt-6">
+          <div className="mt-6 flex gap-3">
             <button
               onClick={showAddForm ? handleAdd : handleSave}
-              className="bg-black text-white px-4 py-2 rounded-lg font-semibold"
+              className="rounded-lg bg-black px-4 py-2 font-semibold text-white"
             >
               {showAddForm ? 'Add Product' : 'Save Changes'}
             </button>
@@ -491,7 +510,7 @@ export default function AdminDashboard() {
                 setShowAddForm(false)
                 setEditingProduct(null)
               }}
-              className="border border-gray-300 px-4 py-2 rounded-lg font-semibold"
+              className="rounded-lg border border-gray-300 px-4 py-2 font-semibold"
             >
               Cancel
             </button>
@@ -499,8 +518,8 @@ export default function AdminDashboard() {
         </div>
       )}
 
-      <div className="bg-white rounded-xl shadow-md overflow-hidden">
-        <div className="p-4 border-b border-gray-200">
+      <div className="overflow-hidden rounded-xl bg-white shadow-md">
+        <div className="border-b border-gray-200 p-4">
           <h2 className="text-xl font-bold text-gray-800">Products</h2>
         </div>
 
@@ -533,18 +552,18 @@ export default function AdminDashboard() {
                     <td className="px-4 py-3 text-gray-700">{product.category}</td>
                     <td className="px-4 py-3 text-gray-700">${product.price.toFixed(2)}</td>
                     <td className="px-4 py-3 text-gray-700">{product.stock}</td>
-                    <td className="px-4 py-3 text-gray-700 max-w-xs">{product.description}</td>
+                    <td className="max-w-xs px-4 py-3 text-gray-700">{product.description}</td>
                     <td className="px-4 py-3">
                       <div className="flex gap-2">
                         <button
                           onClick={() => handleEdit(product)}
-                          className="bg-blue-600 text-white px-3 py-1 rounded-md text-sm"
+                          className="rounded-md bg-blue-600 px-3 py-1 text-sm text-white"
                         >
                           Edit
                         </button>
                         <button
                           onClick={() => handleDelete(product.id)}
-                          className="bg-red-600 text-white px-3 py-1 rounded-md text-sm"
+                          className="rounded-md bg-red-600 px-3 py-1 text-sm text-white"
                         >
                           Delete
                         </button>

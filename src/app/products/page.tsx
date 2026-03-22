@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import ProductGrid from '@/components/ProductGrid'
+import ProductGrid from '@/components/product/ProductGrid'
 
 export default function ProductsPage() {
   const [selectedCategory, setSelectedCategory] = useState<string>('')

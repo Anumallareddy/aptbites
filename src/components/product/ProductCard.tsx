@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import { Product } from '@/types'
 import { useCart } from '@/context/CartContext'
 import { useEffect, useState } from 'react'
@@ -15,7 +16,11 @@ export default function ProductCard({ product }: ProductCardProps) {
   const isOutOfStock = product.stock === 0
   const isLowStock =
     product.stock !== undefined && product.stock > 0 && product.stock < 20
-  const isImagePath = product.image?.startsWith('/')
+  const isImagePath =
+    !!product.image &&
+    (product.image.startsWith('/') ||
+      product.image.startsWith('http://') ||
+      product.image.startsWith('https://'))
 
   const handleAddToCart = () => {
     if (isOutOfStock) return
@@ -50,11 +55,15 @@ export default function ProductCard({ product }: ProductCardProps) {
         )}
 
         {isImagePath ? (
-          <img
-            src={product.image}
-            alt={product.name}
-            className="max-h-[150px] w-auto object-contain transition-transform duration-300 group-hover:scale-105"
-          />
+          <div className="relative h-[150px] w-full">
+            <Image
+              src={product.image}
+              alt={product.name}
+              fill
+              className="object-contain transition-transform duration-300 group-hover:scale-105"
+              sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 300px"
+            />
+          </div>
         ) : (
           <div className="flex items-center justify-center text-7xl transition-transform duration-300 group-hover:scale-105">
             {product.image}

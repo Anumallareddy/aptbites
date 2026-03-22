@@ -1,6 +1,6 @@
 import Link from 'next/link'
-import ProductGrid from '@/components/ProductGrid'
-import CategorySection from '@/components/CategorySection'
+import CategorySection from '@/components/home/CategorySection'
+import ProductGrid from '@/components/product/ProductGrid'
 
 export default function Home() {
   return (
