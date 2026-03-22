@@ -13,6 +13,7 @@ export default function CartPage() {
   const [phoneNumber, setPhoneNumber] = useState('')
   const [deliveryTime, setDeliveryTime] = useState('morning')
   const [instagramReady, setInstagramReady] = useState(false)
+  const [checkoutMessage, setCheckoutMessage] = useState('')
 
   const BUSINESS_PHONE = '14092768534'
   const INSTAGRAM_URL = 'https://www.instagram.com/aptbites/'
@@ -78,21 +79,22 @@ export default function CartPage() {
     const trimmedPhone = phoneNumber.trim()
 
     if (!trimmedName || !trimmedApartment || !trimmedPhone) {
-      alert('Please fill in your name, apartment number, and phone number.')
+      setCheckoutMessage('Please fill in your name, apartment number, and phone number.')
       return false
     }
 
     const phoneDigits = trimmedPhone.replace(/\D/g, '')
     if (phoneDigits.length < 10) {
-      alert('Please enter a valid phone number.')
+      setCheckoutMessage('Please enter a valid phone number.')
       return false
     }
 
     if (cartItems.length === 0) {
-      alert('Your cart is empty.')
+      setCheckoutMessage('Your cart is empty.')
       return false
     }
 
+    setCheckoutMessage('')
     return true
   }
 
@@ -101,6 +103,7 @@ export default function CartPage() {
 
     const message = encodeURIComponent(generateOrderMessage())
     setInstagramReady(false)
+    setCheckoutMessage('Opening your messaging app...')
     window.location.href = `sms:${BUSINESS_PHONE}?body=${message}`
     clearCart()
   }
@@ -111,13 +114,13 @@ export default function CartPage() {
     try {
       await navigator.clipboard.writeText(generateOrderMessage())
       setInstagramReady(true)
-      alert(
-        'Order copied. Instagram will open now. Paste the order into the DM and send it, then come back and tap "I sent the order".'
+      setCheckoutMessage(
+        'Order copied. Instagram is opening now. Paste it into the DM and send it.'
       )
     } catch {
       setInstagramReady(true)
-      alert(
-        'Instagram will open now. Please copy and paste your order into the DM, then come back and tap "I sent the order".'
+      setCheckoutMessage(
+        'Instagram is opening now. Please copy and paste your order into the DM.'
       )
     }
 
@@ -127,11 +130,12 @@ export default function CartPage() {
   const handleInstagramOrderSent = () => {
     clearCart()
     setInstagramReady(false)
-    alert('Thanks! Your cart has been cleared.')
+    setCheckoutMessage('Thanks! Your order was prepared and your cart has been cleared.')
   }
 
   const handleKeepCart = () => {
     setInstagramReady(false)
+    setCheckoutMessage('')
   }
 
   const renderProductImage = (image: string, name: string) => {
@@ -306,6 +310,12 @@ export default function CartPage() {
               Pay with cash, Zelle, or Venmo when your order is confirmed.
             </p>
 
+            {checkoutMessage && (
+              <div className="mt-4 rounded-lg border border-green-200 bg-green-50 p-3 text-sm text-green-800">
+                {checkoutMessage}
+              </div>
+            )}
+
             <div className="mt-5 space-y-3">
               <button
                 onClick={handleSMSCheckout}
@@ -325,7 +335,8 @@ export default function CartPage() {
             {instagramReady && (
               <div className="mt-4 rounded-lg border border-pink-200 bg-pink-50 p-4">
                 <p className="text-sm text-gray-700">
-                  Your order message is ready. Paste it into the Instagram DM, send it, then clear your cart.
+                  Your order message is ready. Paste it into the Instagram DM, send it,
+                  then clear your cart.
                 </p>
 
                 <div className="mt-3 space-y-2">
