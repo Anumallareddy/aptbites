@@ -1,3 +1,24 @@
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'Pickup & Delivery',
+  description:
+    'See how AptBites pickup and delivery works for snacks, drinks, and apartment essentials.',
+  alternates: {
+    canonical: '/pickup-delivery',
+  },
+  openGraph: {
+    title: 'Pickup & Delivery | AptBites',
+    description:
+      'See how AptBites pickup and delivery works for snacks, drinks, and apartment essentials.',
+    url: 'https://www.aptbites.com/pickup-delivery',
+  },
+  twitter: {
+    title: 'Pickup & Delivery | AptBites',
+    description:
+      'See how AptBites pickup and delivery works for snacks, drinks, and apartment essentials.',
+  },
+}
 import Link from 'next/link'
 
 export default function PickupDeliveryPage() {

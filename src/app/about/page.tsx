@@ -1,3 +1,24 @@
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'About',
+  description:
+    'Learn about AptBites and how we bring snacks, drinks, and essentials to your apartment community.',
+  alternates: {
+    canonical: '/about',
+  },
+  openGraph: {
+    title: 'About | AptBites',
+    description:
+      'Learn about AptBites and how we bring snacks, drinks, and essentials to your apartment community.',
+    url: 'https://www.aptbites.com/about',
+  },
+  twitter: {
+    title: 'About | AptBites',
+    description:
+      'Learn about AptBites and how we bring snacks, drinks, and essentials to your apartment community.',
+  },
+}
 import Image from 'next/image'
 import Link from 'next/link'
 
