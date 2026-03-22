@@ -12,6 +12,7 @@ export default function CartPage() {
   const [customerName, setCustomerName] = useState('')
   const [phoneNumber, setPhoneNumber] = useState('')
   const [deliveryTime, setDeliveryTime] = useState('morning')
+  const [instagramReady, setInstagramReady] = useState(false)
 
   const BUSINESS_PHONE = '14092768534'
   const INSTAGRAM_URL = 'https://www.instagram.com/aptbites/'
@@ -75,8 +76,11 @@ export default function CartPage() {
 
   const handleSMSCheckout = () => {
     if (!validateInfo()) return
+
     const message = encodeURIComponent(generateOrderMessage())
+    setInstagramReady(false)
     window.location.href = `sms:${BUSINESS_PHONE}?body=${message}`
+    clearCart()
   }
 
   const handleInstagramCheckout = async () => {
@@ -84,12 +88,24 @@ export default function CartPage() {
 
     try {
       await navigator.clipboard.writeText(generateOrderMessage())
-      alert('Order copied. Instagram will open now. Paste your order into the DM and send it.')
+      setInstagramReady(true)
+      alert('Order copied. Instagram will open now. Paste the order into the DM and send it, then come back and tap "I sent the order".')
     } catch {
-      alert('Instagram will open now. Please copy and paste your order into the DM.')
+      setInstagramReady(true)
+      alert('Instagram will open now. Please copy and paste your order into the DM, then come back and tap "I sent the order".')
     }
 
-    window.location.href = INSTAGRAM_URL
+    window.open(INSTAGRAM_URL, '_blank', 'noopener,noreferrer')
+  }
+
+  const handleInstagramOrderSent = () => {
+    clearCart()
+    setInstagramReady(false)
+    alert('Thanks! Your cart has been cleared.')
+  }
+
+  const handleKeepCart = () => {
+    setInstagramReady(false)
   }
 
   const renderProductImage = (image: string, name: string) => {
@@ -279,6 +295,30 @@ export default function CartPage() {
                 📸 Order via Instagram
               </button>
             </div>
+
+            {instagramReady && (
+              <div className="mt-4 rounded-lg border border-pink-200 bg-pink-50 p-4">
+                <p className="text-sm text-gray-700">
+                  Your order message is ready. Paste it into the Instagram DM, send it, then clear your cart.
+                </p>
+
+                <div className="mt-3 space-y-2">
+                  <button
+                    onClick={handleInstagramOrderSent}
+                    className="w-full rounded-lg bg-pink-600 py-3 font-semibold text-white transition hover:bg-pink-700"
+                  >
+                    I sent the order
+                  </button>
+
+                  <button
+                    onClick={handleKeepCart}
+                    className="w-full rounded-lg border border-gray-300 py-3 font-semibold text-gray-700 transition hover:bg-gray-50"
+                  >
+                    Keep cart for now
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
