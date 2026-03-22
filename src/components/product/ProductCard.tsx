@@ -4,6 +4,7 @@ import Image from 'next/image'
 import { Product } from '@/types'
 import { useCart } from '@/context/CartContext'
 import { useEffect, useState } from 'react'
+import { trackEvent } from '@/lib/analytics'
 
 interface ProductCardProps {
   product: Product
@@ -28,6 +29,11 @@ export default function ProductCard({ product }: ProductCardProps) {
     if (isOutOfStock) return
 
     addToCart(product)
+    trackEvent('add_to_cart', {
+      product_name: product.name,
+      category: product.category,
+      price: product.price,
+    })
     setAdded(true)
     setAnimateCard(true)
   }

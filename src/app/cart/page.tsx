@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useCart } from '@/context/CartContext'
+import { trackEvent } from '@/lib/analytics'
 
 export default function CartPage() {
   const { cartItems, removeFromCart, updateQuantity, clearCart, cartTotal } = useCart()
@@ -101,6 +102,12 @@ export default function CartPage() {
   const handleSMSCheckout = () => {
     if (!validateInfo()) return
 
+    trackEvent('text_order_clicked', {
+      items_count: cartItems.length,
+      total,
+      delivery_time: deliveryTime,
+    })
+
     const message = encodeURIComponent(generateOrderMessage())
     setInstagramReady(false)
     setCheckoutMessage('Opening your messaging app...')
@@ -110,6 +117,12 @@ export default function CartPage() {
 
   const handleInstagramCheckout = async () => {
     if (!validateInfo()) return
+
+    trackEvent('instagram_order_clicked', {
+      items_count: cartItems.length,
+      total,
+      delivery_time: deliveryTime,
+    })
 
     try {
       await navigator.clipboard.writeText(generateOrderMessage())
@@ -128,6 +141,11 @@ export default function CartPage() {
   }
 
   const handleInstagramOrderSent = () => {
+    trackEvent('instagram_order_confirmed', {
+      items_count: cartItems.length,
+      total,
+    })
+
     clearCart()
     setInstagramReady(false)
     setCheckoutMessage('Thanks! Your order was prepared and your cart has been cleared.')
