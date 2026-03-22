@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useCart } from '@/context/CartContext'
@@ -20,6 +20,28 @@ export default function CartPage() {
   const subtotal = cartTotal
   const tax = subtotal * 0.0825
   const total = subtotal + tax
+
+  useEffect(() => {
+    const savedName = localStorage.getItem('aptbites_name')
+    const savedApartment = localStorage.getItem('aptbites_apartment')
+    const savedPhone = localStorage.getItem('aptbites_phone')
+
+    if (savedName) setCustomerName(savedName)
+    if (savedApartment) setApartmentNumber(savedApartment)
+    if (savedPhone) setPhoneNumber(savedPhone)
+  }, [])
+
+  useEffect(() => {
+    localStorage.setItem('aptbites_name', customerName)
+  }, [customerName])
+
+  useEffect(() => {
+    localStorage.setItem('aptbites_apartment', apartmentNumber)
+  }, [apartmentNumber])
+
+  useEffect(() => {
+    localStorage.setItem('aptbites_phone', phoneNumber)
+  }, [phoneNumber])
 
   const generateOrderMessage = () => {
     const deliveryTimeText =
@@ -89,10 +111,14 @@ export default function CartPage() {
     try {
       await navigator.clipboard.writeText(generateOrderMessage())
       setInstagramReady(true)
-      alert('Order copied. Instagram will open now. Paste the order into the DM and send it, then come back and tap "I sent the order".')
+      alert(
+        'Order copied. Instagram will open now. Paste the order into the DM and send it, then come back and tap "I sent the order".'
+      )
     } catch {
       setInstagramReady(true)
-      alert('Instagram will open now. Please copy and paste your order into the DM, then come back and tap "I sent the order".')
+      alert(
+        'Instagram will open now. Please copy and paste your order into the DM, then come back and tap "I sent the order".'
+      )
     }
 
     window.open(INSTAGRAM_URL, '_blank', 'noopener,noreferrer')
