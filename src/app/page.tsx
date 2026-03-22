@@ -61,7 +61,7 @@ export default function Home() {
             </Link>
           </div>
 
-          <ProductGrid featured={true} />
+          <ProductGrid featured={true} showHeader={false} />
         </div>
       </section>
 

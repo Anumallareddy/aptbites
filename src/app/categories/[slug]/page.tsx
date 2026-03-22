@@ -73,7 +73,7 @@ export default function CategoryPage() {
           </Link>
         </div>
 
-        <ProductGrid category={category.name} />
+        <ProductGrid category={category.name} showHeader={false} />
       </div>
     </div>
   )

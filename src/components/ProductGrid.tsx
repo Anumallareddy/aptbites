@@ -10,6 +10,7 @@ interface ProductGridProps {
   category?: string
   searchQuery?: string
   sortBy?: string
+  showHeader?: boolean
 }
 
 export default function ProductGrid({
@@ -17,6 +18,7 @@ export default function ProductGrid({
   category,
   searchQuery = '',
   sortBy = 'featured',
+  showHeader = true,
 }: ProductGridProps) {
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
@@ -57,7 +59,7 @@ export default function ProductGrid({
       filtered = filtered.filter(
         (p) =>
           p.name.toLowerCase().includes(query) ||
-          p.category.toLowerCase().includes(query)
+          (p.category || '').toLowerCase().includes(query)
       )
     }
 
@@ -96,10 +98,12 @@ export default function ProductGrid({
   if (loading) {
     return (
       <section>
-        <div className="mb-6">
-          <h2 className="text-2xl font-bold text-gray-800">{getTitle()}</h2>
-          <p className="mt-1 text-sm text-gray-600">{getSubtitle()}</p>
-        </div>
+        {showHeader && (
+          <div className="mb-6">
+            <h2 className="text-2xl font-bold text-gray-800">{getTitle()}</h2>
+            <p className="mt-1 text-sm text-gray-600">{getSubtitle()}</p>
+          </div>
+        )}
 
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {[...Array(8)].map((_, index) => (
@@ -126,10 +130,12 @@ export default function ProductGrid({
   if (displayProducts.length === 0) {
     return (
       <section>
-        <div className="mb-6">
-          <h2 className="text-2xl font-bold text-gray-800">{getTitle()}</h2>
-          <p className="mt-1 text-sm text-gray-600">{getSubtitle()}</p>
-        </div>
+        {showHeader && (
+          <div className="mb-6">
+            <h2 className="text-2xl font-bold text-gray-800">{getTitle()}</h2>
+            <p className="mt-1 text-sm text-gray-600">{getSubtitle()}</p>
+          </div>
+        )}
 
         <div className="rounded-2xl border border-gray-100 bg-white px-6 py-14 text-center shadow-sm">
           <h3 className="text-lg font-semibold text-gray-800">No products found</h3>
@@ -143,12 +149,14 @@ export default function ProductGrid({
 
   return (
     <section>
-      <div className="mb-6 flex items-end justify-between gap-4">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-800">{getTitle()}</h2>
-          <p className="mt-1 text-sm text-gray-600">{getSubtitle()}</p>
+      {showHeader && (
+        <div className="mb-6 flex items-end justify-between gap-4">
+          <div>
+            <h2 className="text-2xl font-bold text-gray-800">{getTitle()}</h2>
+            <p className="mt-1 text-sm text-gray-600">{getSubtitle()}</p>
+          </div>
         </div>
-      </div>
+      )}
 
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
         {displayProducts.map((product) => (
