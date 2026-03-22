@@ -8,24 +8,30 @@ import { CartProvider } from '@/context/CartContext'
 const inter = Inter({ subsets: ['latin'], display: 'swap' })
 
 export const metadata: Metadata = {
-  title: 'AptBites | Apartment Delivery Store',
+  title: {
+    default: 'AptBites',
+    template: '%s | AptBites',
+  },
   description:
-    'Order snacks, drinks, and household essentials directly to your apartment. Simple, fast, and local delivery.',
+    'Snacks, drinks, and everyday essentials delivered right to your apartment.',
   keywords: [
     'AptBites',
     'apartment delivery',
-    'snacks delivery',
-    'drinks delivery',
+    'snacks',
+    'drinks',
     'household essentials',
-    'local convenience store',
   ],
+  metadataBase: new URL('https://aptbites.com'),
   openGraph: {
-    title: 'AptBites | Apartment Delivery Store',
+    title: 'AptBites',
     description:
-      'Simple apartment delivery for snacks, drinks, and essentials.',
+      'Snacks, drinks, and essentials delivered right to your apartment.',
     url: 'https://aptbites.com',
     siteName: 'AptBites',
     type: 'website',
+  },
+  icons: {
+    icon: '/logo.png',
   },
 }
 
@@ -36,7 +42,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`${inter.className} bg-gray-50 text-gray-900`}>
+      <body className={inter.className}>
         <CartProvider>
           <div className="flex min-h-screen flex-col">
             <Header />

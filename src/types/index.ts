@@ -12,6 +12,10 @@ export interface Product {
 export interface CartItem {
   id: number
   quantity: number
+  name: string
+  price: number
+  image: string
+  category?: 'Snacks' | 'Beverages' | 'Household'
 }
 
 export interface CartContextType {

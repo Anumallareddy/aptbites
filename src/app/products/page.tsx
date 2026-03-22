@@ -8,26 +8,29 @@ export default function ProductsPage() {
   const [searchQuery, setSearchQuery] = useState<string>('')
   const [sortBy, setSortBy] = useState<string>('featured')
 
+  const hasFilters = selectedCategory || searchQuery || sortBy !== 'featured'
+
+  const clearFilters = () => {
+    setSelectedCategory('')
+    setSearchQuery('')
+    setSortBy('featured')
+  }
+
   return (
-    <div className="bg-gray-50 min-h-screen">
+    <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto px-4 py-8">
-        {/* Page Header */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-800 mb-2">All Products</h1>
-          <p className="text-gray-600">
-            Browse snacks, drinks, and apartment essentials available for delivery.
-          </p>
+        <div className="mb-6">
+          <h1 className="text-3xl font-bold text-gray-800">Products</h1>
         </div>
 
-        {/* Filters */}
-        <div className="bg-white rounded-xl shadow-md p-4 md:p-6 mb-8 border border-gray-100">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="mb-8 rounded-2xl border border-gray-100 bg-white p-4 shadow-sm md:p-6">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <label className="mb-2 block text-sm font-semibold text-gray-700">
                 Category
               </label>
               <select
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                className="w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-transparent focus:ring-2 focus:ring-primary"
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
               >
@@ -39,24 +42,24 @@ export default function ProductsPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <label className="mb-2 block text-sm font-semibold text-gray-700">
                 Search
               </label>
               <input
                 type="text"
-                placeholder="Search products..."
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                placeholder="Search products"
+                className="w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-transparent focus:ring-2 focus:ring-primary"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <label className="mb-2 block text-sm font-semibold text-gray-700">
                 Sort By
               </label>
               <select
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                className="w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-transparent focus:ring-2 focus:ring-primary"
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
               >
@@ -67,9 +70,19 @@ export default function ProductsPage() {
               </select>
             </div>
           </div>
+
+          {hasFilters && (
+            <div className="mt-4 flex justify-end">
+              <button
+                onClick={clearFilters}
+                className="text-sm font-semibold text-primary transition hover:text-secondary"
+              >
+                Clear filters
+              </button>
+            </div>
+          )}
         </div>
 
-        {/* Product Grid */}
         <ProductGrid
           category={selectedCategory}
           searchQuery={searchQuery}

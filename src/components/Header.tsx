@@ -2,13 +2,14 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
+import { ShoppingCart } from 'lucide-react'
 import { useCart } from '@/context/CartContext'
 
 export default function Header() {
   const { cartCount } = useCart()
 
   return (
-    <header className="bg-white shadow-md sticky top-0 z-50">
+    <header className="sticky top-0 z-50 border-b border-gray-100 bg-white/95 shadow-sm backdrop-blur">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between py-4">
           <Link href="/" className="flex items-center gap-3">
@@ -17,43 +18,42 @@ export default function Header() {
               alt="AptBites Logo"
               width={40}
               height={40}
-              className="w-10 h-10 object-contain rounded-lg"
+              className="h-10 w-10 rounded-lg object-contain"
             />
             <span className="text-2xl font-bold text-primary">AptBites</span>
           </Link>
 
-          <nav className="hidden md:flex space-x-8">
-            <Link href="/" className="text-gray-700 hover:text-primary transition">
+          <nav className="hidden items-center gap-8 md:flex">
+            <Link href="/" className="text-gray-700 transition hover:text-primary">
               Home
             </Link>
-            <Link href="/products" className="text-gray-700 hover:text-primary transition">
+            <Link href="/products" className="text-gray-700 transition hover:text-primary">
               Products
             </Link>
-            <Link href="/pickup-delivery" className="text-gray-700 hover:text-primary transition">
-              Pickup Delivery
+            <Link
+              href="/pickup-delivery"
+              className="text-gray-700 transition hover:text-primary"
+            >
+              Pickup & Delivery
             </Link>
-            <Link href="/about" className="text-gray-700 hover:text-primary transition">
+            <Link href="/about" className="text-gray-700 transition hover:text-primary">
               About
             </Link>
           </nav>
 
-          <div className="flex items-center space-x-4">
-            <Link href="/cart" className="relative hover:opacity-75 transition">
-              <span className="text-2xl">🛒</span>
-              {cartCount > 0 && (
-                <span className="absolute -top-2 -right-2 bg-accent text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-semibold">
-                  {cartCount}
-                </span>
-              )}
-            </Link>
+          <Link
+            href="/cart"
+            className="relative inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 font-semibold text-white transition hover:bg-secondary"
+          >
+            <ShoppingCart size={18} />
+            <span>Cart</span>
 
-            <Link
-              href="/cart"
-              className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-secondary transition font-semibold"
-            >
-              View Cart
-            </Link>
-          </div>
+            {cartCount > 0 && (
+              <span className="flex h-5 min-w-[20px] items-center justify-center rounded-full bg-accent px-1 text-xs font-semibold text-white">
+                {cartCount}
+              </span>
+            )}
+          </Link>
         </div>
       </div>
     </header>

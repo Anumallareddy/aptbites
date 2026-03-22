@@ -2,7 +2,6 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react'
 import { Product, CartItem, CartContextType } from '@/types'
-import { getProducts } from '@/data/products'
 
 const CART_STORAGE_KEY = 'aptbites-cart'
 
@@ -15,6 +14,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     try {
       const savedCart = localStorage.getItem(CART_STORAGE_KEY)
+
       if (savedCart) {
         const parsedCart = JSON.parse(savedCart)
 
@@ -24,11 +24,18 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
                 (item) =>
                   item &&
                   typeof item.id === 'number' &&
-                  typeof item.quantity === 'number'
+                  typeof item.quantity === 'number' &&
+                  typeof item.name === 'string' &&
+                  typeof item.price === 'number' &&
+                  typeof item.image === 'string'
               )
               .map((item) => ({
                 id: item.id,
                 quantity: item.quantity,
+                name: item.name,
+                price: item.price,
+                image: item.image,
+                category: item.category,
               }))
           : []
 
@@ -64,7 +71,17 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         )
       }
 
-      return [...prevItems, { id: product.id, quantity: 1 }]
+      return [
+        ...prevItems,
+        {
+          id: product.id,
+          quantity: 1,
+          name: product.name,
+          price: product.price,
+          image: product.image,
+          category: product.category,
+        },
+      ]
     })
   }
 
@@ -91,11 +108,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const cartCount = cartItems.reduce((sum, item) => sum + item.quantity, 0)
 
-  const products = getProducts()
-  const cartTotal = cartItems.reduce((sum, item) => {
-    const product = products.find((p) => p.id === item.id)
-    return sum + (product ? product.price * item.quantity : 0)
-  }, 0)
+  const cartTotal = cartItems.reduce(
+    (sum, item) => sum + item.price * item.quantity,
+    0
+  )
 
   return (
     <CartContext.Provider
