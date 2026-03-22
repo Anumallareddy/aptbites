@@ -2,7 +2,7 @@ export interface Product {
   id: number
   name: string
   price: number
-  category: 'Snacks' | 'Beverages' | 'Household'
+  category: 'Snacks' | 'Beverages' | 'Essentials'
   image: string
   rating: number
   description?: string
@@ -15,7 +15,7 @@ export interface CartItem {
   name: string
   price: number
   image: string
-  category?: 'Snacks' | 'Beverages' | 'Household'
+  category?: 'Snacks' | 'Beverages' | 'Essentials'
 }
 
 export interface CartContextType {

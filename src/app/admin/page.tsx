@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase/client'
 
-type Category = 'Snacks' | 'Beverages' | 'Household'
+type Category = 'Snacks' | 'Beverages' | 'Essentials'
 
 type AdminProduct = {
   id: number
@@ -422,7 +422,7 @@ export default function AdminDashboard() {
               >
                 <option value="Snacks">Snacks</option>
                 <option value="Beverages">Beverages</option>
-                <option value="Household">Household</option>
+                <option value="Essentials">Essentials</option>
               </select>
             </div>
 

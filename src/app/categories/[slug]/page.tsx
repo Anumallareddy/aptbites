@@ -4,7 +4,14 @@ import { useParams } from 'next/navigation'
 import ProductGrid from '@/components/product/ProductGrid'
 import Link from 'next/link'
 
-const categoryInfo: Record<string, { name: string; icon: string; description: string }> = {
+const categoryInfo: Record<
+  string,
+  {
+    name: string
+    icon: string
+    description: string
+  }
+> = {
   snacks: {
     name: 'Snacks',
     icon: '🍿',
@@ -15,8 +22,15 @@ const categoryInfo: Record<string, { name: string; icon: string; description: st
     icon: '🥤',
     description: 'Cold drinks, juices, water, and more.',
   },
-  household: {
-    name: 'Household',
+  essentials: {
+    name: 'Essentials',
+    icon: '🧴',
+    description: 'Everyday essentials for cleaning, care, and convenience.',
+  },
+
+  // optional alias so old /categories/Essentials also works
+  Essentials: {
+    name: 'Essentials',
     icon: '🧴',
     description: 'Everyday essentials for cleaning, care, and convenience.',
   },

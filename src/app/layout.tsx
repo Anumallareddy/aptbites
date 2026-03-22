@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import './globals.css'
 import { CartProvider } from '@/context/CartContext'
+import Header from '@/components/layout/Header'
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.aptbites.com'),
@@ -75,7 +76,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <CartProvider>{children}</CartProvider>
+        <CartProvider>
+          <Header />
+          <main>{children}</main>
+        </CartProvider>
       </body>
     </html>
   )

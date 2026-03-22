@@ -66,7 +66,7 @@ export default function PickupDeliveryPage() {
             <h3 className="mb-3 text-xl font-bold text-gray-800">Best for</h3>
             <div className="space-y-2 text-gray-700">
               <p>Snacks and drinks</p>
-              <p>Household essentials</p>
+              <p>Essentials essentials</p>
               <p>Small grocery orders</p>
               <p>Quick errands</p>
             </div>

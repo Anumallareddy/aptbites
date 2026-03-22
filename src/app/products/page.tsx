@@ -37,7 +37,7 @@ export default function ProductsPage() {
                 <option value="">All Categories</option>
                 <option value="Snacks">Snacks</option>
                 <option value="Beverages">Beverages</option>
-                <option value="Household">Household</option>
+                <option value="Essentials">Essentials</option>
               </select>
             </div>
 

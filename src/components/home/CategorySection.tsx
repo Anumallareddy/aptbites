@@ -3,7 +3,7 @@ import Link from 'next/link'
 const categories = [
   { id: 1, name: 'Snacks', icon: '🍿', slug: 'snacks' },
   { id: 2, name: 'Beverages', icon: '🥤', slug: 'beverages' },
-  { id: 3, name: 'Household', icon: '🧴', slug: 'household' },
+  { id: 3, name: 'Essentials', icon: '🧴', slug: 'Essentials' },
 ]
 
 export default function CategorySection() {
